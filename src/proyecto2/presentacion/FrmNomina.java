@@ -8,6 +8,10 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.IOException;
@@ -18,6 +22,7 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -69,6 +74,9 @@ public class FrmNomina extends JFrame {
     private JLabel lblAyudaCedula;
     private JLabel lblAyudaSalario;
     private JLabel lblAyudaCorreoDestino;
+    private JButton btnEnviar;
+    private JButton btnLimpiar;
+    private JCheckBox chkMostrarClaveCorreo;
 
     private final Correo correoHelper = new Correo();
     private final CalculoNomina calculoNomina = new CalculoNomina();
@@ -88,6 +96,12 @@ public class FrmNomina extends JFrame {
         setSize(1160, 720);
         setLocationRelativeTo(null);
         setResizable(true);
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowOpened(WindowEvent e) {
+                txtRemitente.requestFocusInWindow();
+            }
+        });
     }
 
     private void initComponents() {
@@ -266,6 +280,15 @@ public class FrmNomina extends JFrame {
         container.add(lblAyudaClaveCorreo, gbc);
 
         gbc.gridy++;
+        gbc.insets = new Insets(2, 0, 10, 0);
+        chkMostrarClaveCorreo = new JCheckBox("Mostrar contrasena de aplicacion");
+        chkMostrarClaveCorreo.setOpaque(false);
+        chkMostrarClaveCorreo.setForeground(MUTED);
+        chkMostrarClaveCorreo.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        chkMostrarClaveCorreo.addActionListener(evt -> txtClaveCorreo.setEchoChar(chkMostrarClaveCorreo.isSelected() ? (char) 0 : '\u2022'));
+        container.add(chkMostrarClaveCorreo, gbc);
+
+        gbc.gridy++;
         gbc.insets = new Insets(10, 0, 6, 0);
         container.add(createFieldLabel("Nombre del empleado"), gbc);
 
@@ -323,12 +346,13 @@ public class FrmNomina extends JFrame {
 
         gbc.gridy++;
         gbc.insets = new Insets(12, 0, 10, 0);
-        JButton btnEnviar = createPrimaryButton("Generar PDF y enviar");
+        btnEnviar = createPrimaryButton("Generar PDF y enviar");
         btnEnviar.addActionListener(evt -> procesarNomina());
         container.add(btnEnviar, gbc);
+        getRootPane().setDefaultButton(btnEnviar);
 
         gbc.gridy++;
-        JButton btnLimpiar = createSecondaryButton("Limpiar formulario");
+        btnLimpiar = createSecondaryButton("Limpiar formulario");
         btnLimpiar.addActionListener(evt -> limpiarCampos());
         container.add(btnLimpiar, gbc);
 
@@ -411,6 +435,7 @@ public class FrmNomina extends JFrame {
         ));
         field.setFont(new Font("SansSerif", Font.PLAIN, 14));
         field.setBackground(new Color(252, 253, 255));
+        field.setToolTipText("Completa este campo antes de enviar el comprobante.");
         return field;
     }
 
@@ -423,6 +448,8 @@ public class FrmNomina extends JFrame {
         ));
         field.setFont(new Font("SansSerif", Font.PLAIN, 14));
         field.setBackground(new Color(252, 253, 255));
+        field.setEchoChar('\u2022');
+        field.setToolTipText("Usa la contrasena de aplicacion asociada al remitente.");
         return field;
     }
 
@@ -455,6 +482,12 @@ public class FrmNomina extends JFrame {
         instalarValidacionEnVivo(txtCedula, () -> validarCedula(false));
         instalarValidacionEnVivo(txtSalario, () -> validarSalario(false));
         instalarValidacionEnVivo(txtCorreoDestino, () -> validarCorreoDestino(false));
+        txtSalario.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                normalizarSalario();
+            }
+        });
     }
 
     private void instalarValidacionEnVivo(JTextField field, Runnable accion) {
@@ -574,7 +607,7 @@ public class FrmNomina extends JFrame {
     }
 
     private boolean validarSalario(boolean mostrarVacioComoError) {
-        String valor = txtSalario.getText().trim();
+        String valor = txtSalario.getText().trim().replace(',', '.');
 
         if (valor.isEmpty()) {
             if (mostrarVacioComoError) {
@@ -598,6 +631,21 @@ public class FrmNomina extends JFrame {
 
         marcarCampo(txtSalario, lblAyudaSalario, "Salario valido.", SUCCESS);
         return true;
+    }
+
+    private void normalizarSalario() {
+        String valor = txtSalario.getText().trim().replace(',', '.');
+
+        if (valor.isEmpty()) {
+            return;
+        }
+
+        try {
+            double salario = Double.parseDouble(valor);
+            txtSalario.setText(String.format(java.util.Locale.US, "%.2f", salario));
+        } catch (NumberFormatException ex) {
+            // La validacion visual ya informa el error al usuario.
+        }
     }
 
     private void marcarCampo(JTextField field, JLabel helpLabel, String message, Color color) {
@@ -624,7 +672,7 @@ public class FrmNomina extends JFrame {
         String claveCorreo = new String(txtClaveCorreo.getPassword()).trim();
         String nombre = txtNombre.getText().trim();
         String cedula = txtCedula.getText().trim();
-        String salarioTexto = txtSalario.getText().trim();
+        String salarioTexto = txtSalario.getText().trim().replace(',', '.');
         String correoDestino = txtCorreoDestino.getText().trim();
 
         boolean formularioValido = validarRemitente(true)
@@ -656,6 +704,7 @@ public class FrmNomina extends JFrame {
         Nomina nomina = calculoNomina.calcular(empleado);
 
         try {
+            setEstadoFormulario(false, "Procesando nomina y preparando envio...");
             Path rutaPdf = generadorPDF.generarPdf(empleado, nomina);
             registrarNomina(empleado, nomina, rutaPdf);
             mailService.enviarCorreo(correoHelper.limpiar(remitente), claveCorreo, empleado, nomina, rutaPdf);
@@ -671,6 +720,8 @@ public class FrmNomina extends JFrame {
         } catch (Exception ex) {
             registrarErrorTecnico(ex);
             mostrarError("No se pudo completar el envio: " + obtenerMensajeError(ex));
+        } finally {
+            setEstadoFormulario(true, lblEstado.getText());
         }
     }
 
@@ -681,14 +732,17 @@ public class FrmNomina extends JFrame {
         txtCedula.setText("");
         txtSalario.setText("");
         txtCorreoDestino.setText("");
+        chkMostrarClaveCorreo.setSelected(false);
+        txtClaveCorreo.setEchoChar('\u2022');
         restaurarCampo(txtRemitente, lblAyudaRemitente, "Debe ser un Gmail valido para el envio.");
         restaurarCampo(txtClaveCorreo, lblAyudaClaveCorreo, "Usa la contrasena de aplicacion de Gmail.");
         restaurarCampo(txtNombre, lblAyudaNombre, "Ingresa el nombre completo del empleado.");
         restaurarCampo(txtCedula, lblAyudaCedula, "Solo digitos y un formato reconocible.");
         restaurarCampo(txtSalario, lblAyudaSalario, "Ingresa un monto numerico mayor que cero.");
         restaurarCampo(txtCorreoDestino, lblAyudaCorreoDestino, "Debe ser un correo valido para recibir el PDF.");
-        txtResumen.setText("Aqui veras el resumen de la nomina generada.");
+        txtResumen.setText("Aqui veras el resumen de la nomina generada.\n\nSugerencia: completa primero el remitente y luego valida el salario antes de enviar.");
         actualizarEstado("Campos limpiados.", false);
+        txtRemitente.requestFocusInWindow();
     }
 
     private void registrarNomina(Empleado empleado, Nomina nomina, Path rutaPdf) throws IOException {
@@ -765,6 +819,19 @@ public class FrmNomina extends JFrame {
     private void actualizarEstado(String mensaje, boolean error) {
         lblEstado.setText(mensaje);
         lblEstado.setForeground(error ? ERROR : MUTED);
+    }
+
+    private void setEstadoFormulario(boolean habilitado, String mensaje) {
+        txtRemitente.setEnabled(habilitado);
+        txtClaveCorreo.setEnabled(habilitado);
+        txtNombre.setEnabled(habilitado);
+        txtCedula.setEnabled(habilitado);
+        txtSalario.setEnabled(habilitado);
+        txtCorreoDestino.setEnabled(habilitado);
+        chkMostrarClaveCorreo.setEnabled(habilitado);
+        btnEnviar.setEnabled(habilitado);
+        btnLimpiar.setEnabled(habilitado);
+        actualizarEstado(mensaje, false);
     }
 
     public static void main(String[] args) {

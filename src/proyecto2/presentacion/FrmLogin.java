@@ -8,6 +8,8 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.Arrays;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -48,6 +50,9 @@ public class FrmLogin extends JFrame {
     private JLabel lblEstado;
     private JLabel lblAyudaUsuario;
     private JLabel lblAyudaClave;
+    private JButton btnIngresar;
+    private JButton btnLimpiar;
+    private JCheckBox chkMostrarClave;
 
     public FrmLogin() {
         initComponents();
@@ -62,6 +67,12 @@ public class FrmLogin extends JFrame {
         setSize(1024, 640);
         setLocationRelativeTo(null);
         setResizable(true);
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowOpened(WindowEvent e) {
+                txtUsuario.requestFocusInWindow();
+            }
+        });
     }
 
     private void initComponents() {
@@ -243,12 +254,13 @@ public class FrmLogin extends JFrame {
 
         gbc.gridy++;
         gbc.insets = new Insets(12, 0, 10, 0);
-        JButton btnIngresar = createPrimaryButton("Iniciar sesion");
+        btnIngresar = createPrimaryButton("Iniciar sesion");
         btnIngresar.addActionListener(evt -> autenticar());
         container.add(btnIngresar, gbc);
+        getRootPane().setDefaultButton(btnIngresar);
 
         gbc.gridy++;
-        JButton btnLimpiar = createSecondaryButton("Limpiar campos");
+        btnLimpiar = createSecondaryButton("Limpiar campos");
         btnLimpiar.addActionListener(evt -> limpiarCampos());
         container.add(btnLimpiar, gbc);
 
@@ -302,12 +314,23 @@ public class FrmLogin extends JFrame {
         check.setForeground(MUTED);
         check.setFont(new Font("SansSerif", Font.PLAIN, 13));
 
+        chkMostrarClave = new JCheckBox("Mostrar contrasena");
+        chkMostrarClave.setOpaque(false);
+        chkMostrarClave.setForeground(MUTED);
+        chkMostrarClave.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        chkMostrarClave.addActionListener(evt -> txtClave.setEchoChar(chkMostrarClave.isSelected() ? (char) 0 : '\u2022'));
+
+        JPanel left = new JPanel(new BorderLayout(12, 0));
+        left.setOpaque(false);
+        left.add(check, BorderLayout.WEST);
+        left.add(chkMostrarClave, BorderLayout.CENTER);
+
         JLabel link = new JLabel("Necesitas ayuda?");
         link.setForeground(PRIMARY);
         link.setFont(new Font("SansSerif", Font.BOLD, 13));
         link.setHorizontalAlignment(SwingConstants.RIGHT);
 
-        panel.add(check, BorderLayout.WEST);
+        panel.add(left, BorderLayout.WEST);
         panel.add(link, BorderLayout.EAST);
         return panel;
     }
@@ -335,6 +358,7 @@ public class FrmLogin extends JFrame {
         ));
         field.setFont(new Font("SansSerif", Font.PLAIN, 14));
         field.setBackground(new Color(252, 253, 255));
+        field.setToolTipText("Escribe tu usuario para iniciar sesion.");
         return field;
     }
 
@@ -347,6 +371,8 @@ public class FrmLogin extends JFrame {
         ));
         field.setFont(new Font("SansSerif", Font.PLAIN, 14));
         field.setBackground(new Color(252, 253, 255));
+        field.setEchoChar('\u2022');
+        field.setToolTipText("Ingresa tu contrasena de acceso.");
         return field;
     }
 
@@ -473,6 +499,7 @@ public class FrmLogin extends JFrame {
         }
 
         String usuario = txtUsuario.getText().trim();
+        setEstadoFormulario(false, "Validando credenciales...");
         actualizarEstado("Credenciales capturadas correctamente.", false);
         JOptionPane.showMessageDialog(
                 this,
@@ -480,14 +507,27 @@ public class FrmLogin extends JFrame {
                 "Acceso concedido",
                 JOptionPane.INFORMATION_MESSAGE
         );
+        setEstadoFormulario(true, "Listo para iniciar sesion.");
     }
 
     private void limpiarCampos() {
         txtUsuario.setText("");
         txtClave.setText("");
+        chkMostrarClave.setSelected(false);
+        txtClave.setEchoChar('\u2022');
         restaurarCampo(txtUsuario, lblAyudaUsuario, "Escribe tu usuario institucional.");
         restaurarCampo(txtClave, lblAyudaClave, "Ingresa tu contrasena para continuar.");
         actualizarEstado("Campos limpiados.", false);
+        txtUsuario.requestFocusInWindow();
+    }
+
+    private void setEstadoFormulario(boolean habilitado, String mensaje) {
+        txtUsuario.setEnabled(habilitado);
+        txtClave.setEnabled(habilitado);
+        chkMostrarClave.setEnabled(habilitado);
+        btnIngresar.setEnabled(habilitado);
+        btnLimpiar.setEnabled(habilitado);
+        actualizarEstado(mensaje, false);
     }
 
     private void actualizarEstado(String mensaje, boolean error) {
