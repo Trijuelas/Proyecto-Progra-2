@@ -8,6 +8,7 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.util.Arrays;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -21,7 +22,10 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
+import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 public class FrmLogin extends JFrame {
 
@@ -35,14 +39,20 @@ public class FrmLogin extends JFrame {
     private static final Color TEXT = new Color(33, 37, 41);
     private static final Color MUTED = new Color(108, 117, 125);
     private static final Color BORDER = new Color(220, 226, 234);
+    private static final Color SUCCESS = new Color(46, 125, 50);
+    private static final Color ERROR = new Color(198, 40, 40);
+    private static final Color WARNING = new Color(239, 108, 0);
 
     private JTextField txtUsuario;
     private JPasswordField txtClave;
     private JLabel lblEstado;
+    private JLabel lblAyudaUsuario;
+    private JLabel lblAyudaClave;
 
     public FrmLogin() {
         initComponents();
         configurarVentana();
+        configurarValidacionesVisuales();
     }
 
     private void configurarVentana() {
@@ -209,6 +219,11 @@ public class FrmLogin extends JFrame {
         container.add(txtUsuario, gbc);
 
         gbc.gridy++;
+        gbc.insets = new Insets(0, 0, 10, 0);
+        lblAyudaUsuario = createHelperLabel("Escribe tu usuario institucional.");
+        container.add(lblAyudaUsuario, gbc);
+
+        gbc.gridy++;
         gbc.insets = new Insets(10, 0, 6, 0);
         container.add(createFieldLabel("Contrasena"), gbc);
 
@@ -216,6 +231,11 @@ public class FrmLogin extends JFrame {
         gbc.insets = new Insets(6, 0, 10, 0);
         txtClave = createPasswordField();
         container.add(txtClave, gbc);
+
+        gbc.gridy++;
+        gbc.insets = new Insets(0, 0, 10, 0);
+        lblAyudaClave = createHelperLabel("Ingresa tu contrasena para continuar.");
+        container.add(lblAyudaClave, gbc);
 
         gbc.gridy++;
         gbc.insets = new Insets(2, 0, 10, 0);
@@ -299,6 +319,13 @@ public class FrmLogin extends JFrame {
         return label;
     }
 
+    private JLabel createHelperLabel(String text) {
+        JLabel label = new JLabel(text);
+        label.setForeground(MUTED);
+        label.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        return label;
+    }
+
     private JTextField createTextField() {
         JTextField field = new JTextField();
         field.setPreferredSize(new Dimension(0, 40));
@@ -345,16 +372,107 @@ public class FrmLogin extends JFrame {
         return button;
     }
 
-    private void autenticar() {
-        String usuario = txtUsuario.getText().trim();
-        String clave = new String(txtClave.getPassword()).trim();
+    private void configurarValidacionesVisuales() {
+        instalarValidacionEnVivo(txtUsuario, () -> validarUsuario(false));
+        instalarValidacionEnVivo(txtClave, () -> validarClave(false));
+    }
 
-        if (usuario.isEmpty() || clave.isEmpty()) {
-            actualizarEstado("Completa usuario y contrasena.", true);
-            JOptionPane.showMessageDialog(this, "Debes completar ambos campos.", "Validacion", JOptionPane.WARNING_MESSAGE);
+    private void instalarValidacionEnVivo(JTextField field, Runnable accion) {
+        field.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                accion.run();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                accion.run();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                accion.run();
+            }
+        });
+    }
+
+    private boolean validarUsuario(boolean mostrarVacioComoError) {
+        String usuario = txtUsuario.getText().trim();
+
+        if (usuario.isEmpty()) {
+            if (mostrarVacioComoError) {
+                marcarCampo(txtUsuario, lblAyudaUsuario, "El usuario es obligatorio.", ERROR);
+                return false;
+            }
+            restaurarCampo(txtUsuario, lblAyudaUsuario, "Escribe tu usuario institucional.");
+            return false;
+        }
+
+        if (usuario.length() < 3) {
+            marcarCampo(txtUsuario, lblAyudaUsuario, "Debe tener al menos 3 caracteres.", WARNING);
+            return false;
+        }
+
+        marcarCampo(txtUsuario, lblAyudaUsuario, "Usuario con formato valido.", SUCCESS);
+        return true;
+    }
+
+    private boolean validarClave(boolean mostrarVacioComoError) {
+        char[] clave = txtClave.getPassword();
+        String valor = new String(clave).trim();
+
+        try {
+            if (valor.isEmpty()) {
+                if (mostrarVacioComoError) {
+                    marcarCampo(txtClave, lblAyudaClave, "La contrasena es obligatoria.", ERROR);
+                    return false;
+                }
+                restaurarCampo(txtClave, lblAyudaClave, "Ingresa tu contrasena para continuar.");
+                return false;
+            }
+
+            if (valor.length() < 4) {
+                marcarCampo(txtClave, lblAyudaClave, "Debe tener al menos 4 caracteres.", WARNING);
+                return false;
+            }
+
+            marcarCampo(txtClave, lblAyudaClave, "Contrasena capturada correctamente.", SUCCESS);
+            return true;
+        } finally {
+            Arrays.fill(clave, '\0');
+        }
+    }
+
+    private void marcarCampo(JTextField field, JLabel helpLabel, String message, Color color) {
+        field.setBorder(createFieldBorder(color));
+        helpLabel.setForeground(color);
+        helpLabel.setText(message);
+    }
+
+    private void restaurarCampo(JTextField field, JLabel helpLabel, String message) {
+        field.setBorder(createFieldBorder(new Color(206, 212, 218)));
+        helpLabel.setForeground(MUTED);
+        helpLabel.setText(message);
+    }
+
+    private Border createFieldBorder(Color color) {
+        return BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(color, 2),
+                new EmptyBorder(9, 11, 9, 11)
+        );
+    }
+
+    private void autenticar() {
+        boolean usuarioValido = validarUsuario(true);
+        boolean claveValida = validarClave(true);
+
+        if (!usuarioValido || !claveValida) {
+            actualizarEstado("Corrige los campos marcados antes de continuar.", true);
+            JOptionPane.showMessageDialog(this, "Revisa los campos resaltados para continuar.", "Validacion", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
+        String usuario = txtUsuario.getText().trim();
         actualizarEstado("Credenciales capturadas correctamente.", false);
         JOptionPane.showMessageDialog(
                 this,
@@ -367,12 +485,14 @@ public class FrmLogin extends JFrame {
     private void limpiarCampos() {
         txtUsuario.setText("");
         txtClave.setText("");
+        restaurarCampo(txtUsuario, lblAyudaUsuario, "Escribe tu usuario institucional.");
+        restaurarCampo(txtClave, lblAyudaClave, "Ingresa tu contrasena para continuar.");
         actualizarEstado("Campos limpiados.", false);
     }
 
     private void actualizarEstado(String mensaje, boolean error) {
         lblEstado.setText(mensaje);
-        lblEstado.setForeground(error ? new Color(198, 40, 40) : MUTED);
+        lblEstado.setForeground(error ? ERROR : MUTED);
     }
 
     public static void main(String args[]) {

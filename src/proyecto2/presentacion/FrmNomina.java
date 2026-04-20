@@ -12,6 +12,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Arrays;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -25,7 +26,10 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
+import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import proyecto2.AccesoDatos.ArchivoTexto;
 import proyecto2.Entidades.Empleado;
 import proyecto2.Entidades.Nomina;
@@ -47,6 +51,9 @@ public class FrmNomina extends JFrame {
     private static final Color TEXT = new Color(33, 37, 41);
     private static final Color MUTED = new Color(108, 117, 125);
     private static final Color BORDER = new Color(220, 226, 234);
+    private static final Color SUCCESS = new Color(46, 125, 50);
+    private static final Color ERROR = new Color(198, 40, 40);
+    private static final Color WARNING = new Color(239, 108, 0);
 
     private JTextField txtRemitente;
     private JPasswordField txtClaveCorreo;
@@ -56,6 +63,12 @@ public class FrmNomina extends JFrame {
     private JTextField txtCorreoDestino;
     private JTextArea txtResumen;
     private JLabel lblEstado;
+    private JLabel lblAyudaRemitente;
+    private JLabel lblAyudaClaveCorreo;
+    private JLabel lblAyudaNombre;
+    private JLabel lblAyudaCedula;
+    private JLabel lblAyudaSalario;
+    private JLabel lblAyudaCorreoDestino;
 
     private final Correo correoHelper = new Correo();
     private final CalculoNomina calculoNomina = new CalculoNomina();
@@ -65,6 +78,7 @@ public class FrmNomina extends JFrame {
     public FrmNomina() {
         initComponents();
         configurarVentana();
+        configurarValidacionesVisuales();
     }
 
     private void configurarVentana() {
@@ -233,6 +247,11 @@ public class FrmNomina extends JFrame {
         container.add(txtRemitente, gbc);
 
         gbc.gridy++;
+        gbc.insets = new Insets(0, 0, 10, 0);
+        lblAyudaRemitente = createHelperLabel("Debe ser un Gmail valido para el envio.");
+        container.add(lblAyudaRemitente, gbc);
+
+        gbc.gridy++;
         gbc.insets = new Insets(10, 0, 6, 0);
         container.add(createFieldLabel("Contrasena de aplicacion"), gbc);
 
@@ -240,6 +259,11 @@ public class FrmNomina extends JFrame {
         gbc.insets = new Insets(6, 0, 10, 0);
         txtClaveCorreo = createPasswordField();
         container.add(txtClaveCorreo, gbc);
+
+        gbc.gridy++;
+        gbc.insets = new Insets(0, 0, 10, 0);
+        lblAyudaClaveCorreo = createHelperLabel("Usa la contrasena de aplicacion de Gmail.");
+        container.add(lblAyudaClaveCorreo, gbc);
 
         gbc.gridy++;
         gbc.insets = new Insets(10, 0, 6, 0);
@@ -251,6 +275,11 @@ public class FrmNomina extends JFrame {
         container.add(txtNombre, gbc);
 
         gbc.gridy++;
+        gbc.insets = new Insets(0, 0, 10, 0);
+        lblAyudaNombre = createHelperLabel("Ingresa el nombre completo del empleado.");
+        container.add(lblAyudaNombre, gbc);
+
+        gbc.gridy++;
         gbc.insets = new Insets(10, 0, 6, 0);
         container.add(createFieldLabel("Cedula"), gbc);
 
@@ -258,6 +287,11 @@ public class FrmNomina extends JFrame {
         gbc.insets = new Insets(6, 0, 10, 0);
         txtCedula = createTextField();
         container.add(txtCedula, gbc);
+
+        gbc.gridy++;
+        gbc.insets = new Insets(0, 0, 10, 0);
+        lblAyudaCedula = createHelperLabel("Solo digitos y un formato reconocible.");
+        container.add(lblAyudaCedula, gbc);
 
         gbc.gridy++;
         gbc.insets = new Insets(10, 0, 6, 0);
@@ -269,6 +303,11 @@ public class FrmNomina extends JFrame {
         container.add(txtSalario, gbc);
 
         gbc.gridy++;
+        gbc.insets = new Insets(0, 0, 10, 0);
+        lblAyudaSalario = createHelperLabel("Ingresa un monto numerico mayor que cero.");
+        container.add(lblAyudaSalario, gbc);
+
+        gbc.gridy++;
         gbc.insets = new Insets(10, 0, 6, 0);
         container.add(createFieldLabel("Correo del empleado"), gbc);
 
@@ -276,6 +315,11 @@ public class FrmNomina extends JFrame {
         gbc.insets = new Insets(6, 0, 10, 0);
         txtCorreoDestino = createTextField();
         container.add(txtCorreoDestino, gbc);
+
+        gbc.gridy++;
+        gbc.insets = new Insets(0, 0, 10, 0);
+        lblAyudaCorreoDestino = createHelperLabel("Debe ser un correo valido para recibir el PDF.");
+        container.add(lblAyudaCorreoDestino, gbc);
 
         gbc.gridy++;
         gbc.insets = new Insets(12, 0, 10, 0);
@@ -351,6 +395,13 @@ public class FrmNomina extends JFrame {
         return label;
     }
 
+    private JLabel createHelperLabel(String text) {
+        JLabel label = new JLabel(text);
+        label.setForeground(MUTED);
+        label.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        return label;
+    }
+
     private JTextField createTextField() {
         JTextField field = new JTextField();
         field.setPreferredSize(new Dimension(0, 40));
@@ -397,6 +448,177 @@ public class FrmNomina extends JFrame {
         return button;
     }
 
+    private void configurarValidacionesVisuales() {
+        instalarValidacionEnVivo(txtRemitente, () -> validarRemitente(false));
+        instalarValidacionEnVivo(txtClaveCorreo, () -> validarClaveCorreo(false));
+        instalarValidacionEnVivo(txtNombre, () -> validarNombre(false));
+        instalarValidacionEnVivo(txtCedula, () -> validarCedula(false));
+        instalarValidacionEnVivo(txtSalario, () -> validarSalario(false));
+        instalarValidacionEnVivo(txtCorreoDestino, () -> validarCorreoDestino(false));
+    }
+
+    private void instalarValidacionEnVivo(JTextField field, Runnable accion) {
+        field.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                accion.run();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                accion.run();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                accion.run();
+            }
+        });
+    }
+
+    private boolean validarRemitente(boolean mostrarVacioComoError) {
+        return validarCorreo(txtRemitente, lblAyudaRemitente, "Debe ser un Gmail valido para el envio.", mostrarVacioComoError);
+    }
+
+    private boolean validarCorreoDestino(boolean mostrarVacioComoError) {
+        return validarCorreo(txtCorreoDestino, lblAyudaCorreoDestino, "Debe ser un correo valido para recibir el PDF.", mostrarVacioComoError);
+    }
+
+    private boolean validarCorreo(JTextField field, JLabel ayuda, String mensajeBase, boolean mostrarVacioComoError) {
+        String valor = field.getText().trim();
+
+        if (valor.isEmpty()) {
+            if (mostrarVacioComoError) {
+                marcarCampo(field, ayuda, "Este campo es obligatorio.", ERROR);
+                return false;
+            }
+            restaurarCampo(field, ayuda, mensajeBase);
+            return false;
+        }
+
+        if (!correoHelper.esValido(valor)) {
+            marcarCampo(field, ayuda, "El formato del correo no es valido.", WARNING);
+            return false;
+        }
+
+        marcarCampo(field, ayuda, "Correo valido.", SUCCESS);
+        return true;
+    }
+
+    private boolean validarClaveCorreo(boolean mostrarVacioComoError) {
+        char[] clave = txtClaveCorreo.getPassword();
+        String valor = new String(clave).trim();
+
+        try {
+            if (valor.isEmpty()) {
+                if (mostrarVacioComoError) {
+                    marcarCampo(txtClaveCorreo, lblAyudaClaveCorreo, "La contrasena es obligatoria.", ERROR);
+                    return false;
+                }
+                restaurarCampo(txtClaveCorreo, lblAyudaClaveCorreo, "Usa la contrasena de aplicacion de Gmail.");
+                return false;
+            }
+
+            if (valor.length() < 8) {
+                marcarCampo(txtClaveCorreo, lblAyudaClaveCorreo, "La contrasena parece demasiado corta.", WARNING);
+                return false;
+            }
+
+            marcarCampo(txtClaveCorreo, lblAyudaClaveCorreo, "Contrasena capturada.", SUCCESS);
+            return true;
+        } finally {
+            Arrays.fill(clave, '\0');
+        }
+    }
+
+    private boolean validarNombre(boolean mostrarVacioComoError) {
+        String valor = txtNombre.getText().trim();
+
+        if (valor.isEmpty()) {
+            if (mostrarVacioComoError) {
+                marcarCampo(txtNombre, lblAyudaNombre, "El nombre es obligatorio.", ERROR);
+                return false;
+            }
+            restaurarCampo(txtNombre, lblAyudaNombre, "Ingresa el nombre completo del empleado.");
+            return false;
+        }
+
+        if (valor.length() < 3) {
+            marcarCampo(txtNombre, lblAyudaNombre, "Debe tener al menos 3 caracteres.", WARNING);
+            return false;
+        }
+
+        marcarCampo(txtNombre, lblAyudaNombre, "Nombre valido.", SUCCESS);
+        return true;
+    }
+
+    private boolean validarCedula(boolean mostrarVacioComoError) {
+        String valor = txtCedula.getText().trim();
+
+        if (valor.isEmpty()) {
+            if (mostrarVacioComoError) {
+                marcarCampo(txtCedula, lblAyudaCedula, "La cedula es obligatoria.", ERROR);
+                return false;
+            }
+            restaurarCampo(txtCedula, lblAyudaCedula, "Solo digitos y un formato reconocible.");
+            return false;
+        }
+
+        if (!valor.matches("[0-9-]{6,20}")) {
+            marcarCampo(txtCedula, lblAyudaCedula, "Usa solo numeros y guiones.", WARNING);
+            return false;
+        }
+
+        marcarCampo(txtCedula, lblAyudaCedula, "Cedula valida.", SUCCESS);
+        return true;
+    }
+
+    private boolean validarSalario(boolean mostrarVacioComoError) {
+        String valor = txtSalario.getText().trim();
+
+        if (valor.isEmpty()) {
+            if (mostrarVacioComoError) {
+                marcarCampo(txtSalario, lblAyudaSalario, "El salario es obligatorio.", ERROR);
+                return false;
+            }
+            restaurarCampo(txtSalario, lblAyudaSalario, "Ingresa un monto numerico mayor que cero.");
+            return false;
+        }
+
+        try {
+            double salario = Double.parseDouble(valor);
+            if (salario <= 0) {
+                marcarCampo(txtSalario, lblAyudaSalario, "El salario debe ser mayor que cero.", WARNING);
+                return false;
+            }
+        } catch (NumberFormatException ex) {
+            marcarCampo(txtSalario, lblAyudaSalario, "Escribe un numero valido.", WARNING);
+            return false;
+        }
+
+        marcarCampo(txtSalario, lblAyudaSalario, "Salario valido.", SUCCESS);
+        return true;
+    }
+
+    private void marcarCampo(JTextField field, JLabel helpLabel, String message, Color color) {
+        field.setBorder(createFieldBorder(color));
+        helpLabel.setForeground(color);
+        helpLabel.setText(message);
+    }
+
+    private void restaurarCampo(JTextField field, JLabel helpLabel, String message) {
+        field.setBorder(createFieldBorder(new Color(206, 212, 218)));
+        helpLabel.setForeground(MUTED);
+        helpLabel.setText(message);
+    }
+
+    private Border createFieldBorder(Color color) {
+        return BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(color, 2),
+                new EmptyBorder(9, 11, 9, 11)
+        );
+    }
+
     private void procesarNomina() {
         String remitente = txtRemitente.getText().trim();
         String claveCorreo = new String(txtClaveCorreo.getPassword()).trim();
@@ -405,14 +627,15 @@ public class FrmNomina extends JFrame {
         String salarioTexto = txtSalario.getText().trim();
         String correoDestino = txtCorreoDestino.getText().trim();
 
-        if (remitente.isEmpty() || claveCorreo.isEmpty() || nombre.isEmpty()
-                || cedula.isEmpty() || salarioTexto.isEmpty() || correoDestino.isEmpty()) {
-            mostrarError("Debes completar todos los campos.");
-            return;
-        }
+        boolean formularioValido = validarRemitente(true)
+                & validarClaveCorreo(true)
+                & validarNombre(true)
+                & validarCedula(true)
+                & validarSalario(true)
+                & validarCorreoDestino(true);
 
-        if (!correoHelper.esValido(remitente) || !correoHelper.esValido(correoDestino)) {
-            mostrarError("Revisa el correo remitente y el correo del empleado.");
+        if (!formularioValido) {
+            mostrarError("Corrige los campos marcados antes de continuar.");
             return;
         }
 
@@ -458,6 +681,12 @@ public class FrmNomina extends JFrame {
         txtCedula.setText("");
         txtSalario.setText("");
         txtCorreoDestino.setText("");
+        restaurarCampo(txtRemitente, lblAyudaRemitente, "Debe ser un Gmail valido para el envio.");
+        restaurarCampo(txtClaveCorreo, lblAyudaClaveCorreo, "Usa la contrasena de aplicacion de Gmail.");
+        restaurarCampo(txtNombre, lblAyudaNombre, "Ingresa el nombre completo del empleado.");
+        restaurarCampo(txtCedula, lblAyudaCedula, "Solo digitos y un formato reconocible.");
+        restaurarCampo(txtSalario, lblAyudaSalario, "Ingresa un monto numerico mayor que cero.");
+        restaurarCampo(txtCorreoDestino, lblAyudaCorreoDestino, "Debe ser un correo valido para recibir el PDF.");
         txtResumen.setText("Aqui veras el resumen de la nomina generada.");
         actualizarEstado("Campos limpiados.", false);
     }
@@ -535,7 +764,7 @@ public class FrmNomina extends JFrame {
 
     private void actualizarEstado(String mensaje, boolean error) {
         lblEstado.setText(mensaje);
-        lblEstado.setForeground(error ? new Color(198, 40, 40) : MUTED);
+        lblEstado.setForeground(error ? ERROR : MUTED);
     }
 
     public static void main(String[] args) {
