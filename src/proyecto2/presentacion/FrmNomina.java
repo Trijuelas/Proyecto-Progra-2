@@ -33,6 +33,7 @@ import proyecto2.LogicaNegocio.CalculoNomina;
 import proyecto2.LogicaNegocio.Correo;
 import proyecto2.LogicaNegocio.GeneradorPDF;
 import proyecto2.LogicaNegocio.MailService;
+import proyecto2.LogicaNegocio.RutasProyecto;
 
 public class FrmNomina extends JFrame {
 
@@ -378,7 +379,7 @@ public class FrmNomina extends JFrame {
     }
 
     private void registrarNomina(Empleado empleado, Nomina nomina, Path rutaPdf) throws IOException {
-        ArchivoTexto archivo = new ArchivoTexto("data/nominas_registradas.txt");
+        ArchivoTexto archivo = new ArchivoTexto(RutasProyecto.resolver("data", "nominas_registradas.txt").toString());
         archivo.guardar(String.format(
                 "%s | %s | %.2f | %.2f | %.2f | %s",
                 empleado.getNombre(),
@@ -431,7 +432,7 @@ public class FrmNomina extends JFrame {
         error.printStackTrace(new PrintWriter(buffer));
 
         try {
-            ArchivoTexto archivo = new ArchivoTexto("data/ultimo_error_envio.txt");
+            ArchivoTexto archivo = new ArchivoTexto(RutasProyecto.resolver("data", "ultimo_error_envio.txt").toString());
             archivo.guardar("========== NUEVO ERROR ==========");
             archivo.guardar(buffer.toString());
         } catch (IOException ex) {

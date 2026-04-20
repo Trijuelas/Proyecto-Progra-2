@@ -10,14 +10,13 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import proyecto2.Entidades.Empleado;
 import proyecto2.Entidades.Nomina;
 
 public class GeneradorPDF {
 
     public Path generarPdf(Empleado empleado, Nomina nomina) throws Exception {
-        Path directorio = Paths.get("documentos_pdf");
+        Path directorio = RutasProyecto.resolver("documentos_pdf");
         Files.createDirectories(directorio);
 
         String nombreArchivo = String.format(
