@@ -1,0 +1,2 @@
+cris | 118660001 | 100000000,00 | 15000000,00 | 85000000,00 | C:\Users\crcor\OneDrive\Documentos\NetBeansProjects\proyecto2 2\proyecto2 2\documentos_pdf\nomina_118660001_cris.pdf
+cris | 118660001 | 1000000,00 | 150000,00 | 850000,00 | C:\Users\crcor\OneDrive\Documentos\NetBeansProjects\proyecto2 2\proyecto2 2\documentos_pdf\nomina_118660001_cris.pdf
