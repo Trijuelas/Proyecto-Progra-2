@@ -43,8 +43,10 @@ public class FrmNomina extends JFrame {
     private static final Color PANEL = new Color(255, 255, 255);
     private static final Color PRIMARY = new Color(26, 115, 232);
     private static final Color PRIMARY_DARK = new Color(14, 84, 170);
+    private static final Color PRIMARY_SOFT = new Color(231, 240, 255);
     private static final Color TEXT = new Color(33, 37, 41);
     private static final Color MUTED = new Color(108, 117, 125);
+    private static final Color BORDER = new Color(220, 226, 234);
 
     private JTextField txtRemitente;
     private JPasswordField txtClaveCorreo;
@@ -82,7 +84,7 @@ public class FrmNomina extends JFrame {
         JPanel card = new JPanel(new BorderLayout());
         card.setBackground(PANEL);
         card.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(220, 226, 234)),
+                BorderFactory.createLineBorder(BORDER),
                 new EmptyBorder(0, 0, 0, 0)
         ));
 
@@ -129,6 +131,8 @@ public class FrmNomina extends JFrame {
         panel.add(createFeature("PDF", "Genera comprobantes en la carpeta documentos_pdf."));
         panel.add(Box.createVerticalStrut(14));
         panel.add(createFeature("Correo", "Adjunta el PDF y lo envia al destinatario."));
+        panel.add(Box.createVerticalStrut(26));
+        panel.add(createProgressPanel());
 
         return panel;
     }
@@ -149,6 +153,47 @@ public class FrmNomina extends JFrame {
         wrapper.add(dot, BorderLayout.WEST);
         wrapper.add(text, BorderLayout.CENTER);
         return wrapper;
+    }
+
+    private JPanel createProgressPanel() {
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setOpaque(false);
+        panel.setAlignmentX(LEFT_ALIGNMENT);
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.weightx = 1.0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(0, 0, 10, 0);
+        panel.add(createMilestoneCard("1. Captura", "Completa remitente, empleado y salario."), gbc);
+
+        gbc.gridy++;
+        panel.add(createMilestoneCard("2. Generacion", "Se crea el PDF automaticamente."), gbc);
+
+        gbc.gridy++;
+        gbc.insets = new Insets(0, 0, 0, 0);
+        panel.add(createMilestoneCard("3. Envio", "El comprobante se adjunta y se envia por correo."), gbc);
+        return panel;
+    }
+
+    private JPanel createMilestoneCard(String title, String detail) {
+        JPanel card = new JPanel(new BorderLayout(0, 8));
+        card.setOpaque(true);
+        card.setBackground(new Color(255, 255, 255, 30));
+        card.setBorder(new EmptyBorder(14, 16, 14, 16));
+
+        JLabel lblTitle = new JLabel(title);
+        lblTitle.setForeground(Color.WHITE);
+        lblTitle.setFont(new Font("SansSerif", Font.BOLD, 14));
+
+        JLabel lblDetail = new JLabel("<html>" + detail + "</html>");
+        lblDetail.setForeground(new Color(224, 231, 255));
+        lblDetail.setFont(new Font("SansSerif", Font.PLAIN, 13));
+
+        card.add(lblTitle, BorderLayout.NORTH);
+        card.add(lblDetail, BorderLayout.CENTER);
+        return card;
     }
 
     private JPanel buildFormPanel() {
@@ -173,6 +218,10 @@ public class FrmNomina extends JFrame {
         description.setFont(new Font("SansSerif", Font.PLAIN, 15));
         description.setForeground(MUTED);
         container.add(description, gbc);
+
+        gbc.gridy++;
+        gbc.insets = new Insets(22, 0, 18, 0);
+        container.add(buildSummaryBanner(), gbc);
 
         gbc.gridy++;
         gbc.insets = new Insets(24, 0, 6, 0);
@@ -255,11 +304,44 @@ public class FrmNomina extends JFrame {
         txtResumen.setLineWrap(true);
         txtResumen.setWrapStyleWord(true);
         txtResumen.setFont(new Font("SansSerif", Font.PLAIN, 13));
-        txtResumen.setBorder(new EmptyBorder(10, 10, 10, 10));
+        txtResumen.setBackground(new Color(252, 253, 255));
+        txtResumen.setBorder(new EmptyBorder(14, 14, 14, 14));
         txtResumen.setText("Aqui veras el resumen de la nomina generada.");
-        container.add(new JScrollPane(txtResumen), gbc);
+        JScrollPane scroll = new JScrollPane(txtResumen);
+        scroll.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(BORDER),
+                new EmptyBorder(0, 0, 0, 0)
+        ));
+        container.add(scroll, gbc);
 
         return container;
+    }
+
+    private JPanel buildSummaryBanner() {
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBackground(PRIMARY_SOFT);
+        panel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(198, 218, 255)),
+                new EmptyBorder(16, 18, 16, 18)
+        ));
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.WEST;
+
+        JLabel title = new JLabel("Flujo recomendado");
+        title.setForeground(TEXT);
+        title.setFont(new Font("SansSerif", Font.BOLD, 14));
+        panel.add(title, gbc);
+
+        gbc.gridy++;
+        gbc.insets = new Insets(6, 0, 0, 0);
+        JLabel detail = new JLabel("<html>Primero valida los datos del remitente, luego captura salario y correo del empleado antes de generar el comprobante.</html>");
+        detail.setForeground(MUTED);
+        detail.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        panel.add(detail, gbc);
+        return panel;
     }
 
     private JLabel createFieldLabel(String text) {
@@ -277,6 +359,7 @@ public class FrmNomina extends JFrame {
                 new EmptyBorder(10, 12, 10, 12)
         ));
         field.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        field.setBackground(new Color(252, 253, 255));
         return field;
     }
 
@@ -288,6 +371,7 @@ public class FrmNomina extends JFrame {
                 new EmptyBorder(10, 12, 10, 12)
         ));
         field.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        field.setBackground(new Color(252, 253, 255));
         return field;
     }
 

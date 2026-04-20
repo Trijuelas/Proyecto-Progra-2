@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -32,8 +31,10 @@ public class FrmLogin extends JFrame {
     private static final Color PANEL = new Color(255, 255, 255);
     private static final Color PRIMARY = new Color(26, 115, 232);
     private static final Color PRIMARY_DARK = new Color(14, 84, 170);
+    private static final Color PRIMARY_SOFT = new Color(227, 238, 255);
     private static final Color TEXT = new Color(33, 37, 41);
     private static final Color MUTED = new Color(108, 117, 125);
+    private static final Color BORDER = new Color(220, 226, 234);
 
     private JTextField txtUsuario;
     private JPasswordField txtClave;
@@ -61,7 +62,7 @@ public class FrmLogin extends JFrame {
         JPanel card = new JPanel(new BorderLayout());
         card.setBackground(PANEL);
         card.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(220, 226, 234)),
+                BorderFactory.createLineBorder(BORDER),
                 new EmptyBorder(0, 0, 0, 0)
         ));
 
@@ -109,6 +110,8 @@ public class FrmLogin extends JFrame {
         panel.add(createFeature("Agilidad", "Preparado para flujo rapido de trabajo."));
         panel.add(Box.createVerticalStrut(14));
         panel.add(createFeature("Presentacion", "Interfaz moderna y mas profesional."));
+        panel.add(Box.createVerticalStrut(26));
+        panel.add(createStatsPanel());
 
         return panel;
     }
@@ -129,6 +132,44 @@ public class FrmLogin extends JFrame {
         wrapper.add(dot, BorderLayout.WEST);
         wrapper.add(text, BorderLayout.CENTER);
         return wrapper;
+    }
+
+    private JPanel createStatsPanel() {
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setOpaque(false);
+        panel.setAlignmentX(LEFT_ALIGNMENT);
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.weightx = 1.0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(0, 0, 12, 0);
+        panel.add(createStatCard("Acceso rapido", "Diseno limpio para iniciar sin distracciones."), gbc);
+
+        gbc.gridy++;
+        gbc.insets = new Insets(0, 0, 0, 0);
+        panel.add(createStatCard("Interfaz clara", "Jerarquia visual que facilita el siguiente paso."), gbc);
+        return panel;
+    }
+
+    private JPanel createStatCard(String title, String detail) {
+        JPanel card = new JPanel(new BorderLayout(0, 8));
+        card.setOpaque(true);
+        card.setBackground(new Color(255, 255, 255, 30));
+        card.setBorder(new EmptyBorder(14, 16, 14, 16));
+
+        JLabel lblTitle = new JLabel(title);
+        lblTitle.setForeground(Color.WHITE);
+        lblTitle.setFont(new Font("SansSerif", Font.BOLD, 14));
+
+        JLabel lblDetail = new JLabel("<html>" + detail + "</html>");
+        lblDetail.setForeground(new Color(224, 231, 255));
+        lblDetail.setFont(new Font("SansSerif", Font.PLAIN, 13));
+
+        card.add(lblTitle, BorderLayout.NORTH);
+        card.add(lblDetail, BorderLayout.CENTER);
+        return card;
     }
 
     private JPanel buildLoginPanel() {
@@ -153,6 +194,10 @@ public class FrmLogin extends JFrame {
         description.setFont(new Font("SansSerif", Font.PLAIN, 15));
         description.setForeground(MUTED);
         container.add(description, gbc);
+
+        gbc.gridy++;
+        gbc.insets = new Insets(22, 0, 18, 0);
+        container.add(buildHighlightPanel(), gbc);
 
         gbc.gridy++;
         gbc.insets = new Insets(24, 0, 6, 0);
@@ -201,6 +246,33 @@ public class FrmLogin extends JFrame {
         return container;
     }
 
+    private JPanel buildHighlightPanel() {
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBackground(PRIMARY_SOFT);
+        panel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(198, 218, 255)),
+                new EmptyBorder(16, 18, 16, 18)
+        ));
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.WEST;
+
+        JLabel title = new JLabel("Antes de ingresar");
+        title.setForeground(TEXT);
+        title.setFont(new Font("SansSerif", Font.BOLD, 14));
+        panel.add(title, gbc);
+
+        gbc.gridy++;
+        gbc.insets = new Insets(6, 0, 0, 0);
+        JLabel detail = new JLabel("<html>Usa tus credenciales del sistema y verifica que el usuario este escrito correctamente.</html>");
+        detail.setForeground(MUTED);
+        detail.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        panel.add(detail, gbc);
+        return panel;
+    }
+
     private JPanel buildOptionsRow() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setOpaque(false);
@@ -235,6 +307,7 @@ public class FrmLogin extends JFrame {
                 new EmptyBorder(10, 12, 10, 12)
         ));
         field.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        field.setBackground(new Color(252, 253, 255));
         return field;
     }
 
@@ -246,6 +319,7 @@ public class FrmLogin extends JFrame {
                 new EmptyBorder(10, 12, 10, 12)
         ));
         field.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        field.setBackground(new Color(252, 253, 255));
         return field;
     }
 
