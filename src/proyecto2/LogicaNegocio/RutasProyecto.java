@@ -18,6 +18,7 @@ public final class RutasProyecto {
         try {
             Path ubicacion = Paths.get(RutasProyecto.class.getProtectionDomain().getCodeSource().getLocation().toURI()).toAbsolutePath().normalize();
 
+            // Cuando la aplicacion corre desde un JAR, se intenta volver a la raiz del proyecto.
             if (Files.isRegularFile(ubicacion)) {
                 Path padre = ubicacion.getParent();
                 if (padre != null && "dist".equalsIgnoreCase(padre.getFileName().toString())) {
@@ -27,6 +28,7 @@ public final class RutasProyecto {
             }
 
             Path nombre = ubicacion.getFileName();
+            // En ejecuciones desde NetBeans/Ant normalmente el classpath apunta a build/classes.
             if (nombre != null && "classes".equalsIgnoreCase(nombre.toString())) {
                 Path build = ubicacion.getParent();
                 if (build != null && build.getFileName() != null
