@@ -1,14 +1,22 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package proyecto2.AccesoDatos;
 
-/**
- *
- * @author gabriel
- */
+import java.io.IOException;
+
 public interface IArchivo {
-    void guardar(String dato) throws Exception;
-    String leer() throws Exception;
+
+    /**
+     * Agrega un nuevo dato al final del archivo.
+     *
+     * @param dato contenido que se desea almacenar
+     * @throws IOException si ocurre un error al escribir el archivo
+     */
+    void guardar(String dato) throws IOException;
+
+    /**
+     * Lee el contenido completo del archivo.
+     *
+     * @return texto almacenado o cadena vacia si el archivo no existe
+     * @throws IOException si ocurre un error al leer el archivo
+     */
+    String leer() throws IOException;
 }
