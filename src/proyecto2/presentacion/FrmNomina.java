@@ -713,13 +713,27 @@ public class FrmNomina extends JFrame {
             actualizarEstado("PDF generado y correo enviado correctamente.", false);
             JOptionPane.showMessageDialog(
                     this,
-                    "Proceso completado.\nPDF: " + rutaPdf,
-                    "Envio exitoso",
+                    "¡Proceso completado exitosamente!\n\n" +
+                    "✓ PDF generado: " + rutaPdf.getFileName() + "\n" +
+                    "✓ Correo enviado a: " + empleado.getCorreo() + "\n" +
+                    "✓ Salario neto: " + String.format("%.2f", nomina.getSalarioNeto()) + "\n\n" +
+                    "Revisa la carpeta 'documentos_pdf' para el archivo generado.",
+                    "Envío Exitoso",
                     JOptionPane.INFORMATION_MESSAGE
             );
         } catch (Exception ex) {
             registrarErrorTecnico(ex);
-            mostrarError("No se pudo completar el envio: " + obtenerMensajeError(ex));
+            String mensajeError = obtenerMensajeErrorAmigable(ex);
+            actualizarEstado("Error en el envío: " + mensajeError, true);
+            JOptionPane.showMessageDialog(
+                    this,
+                    "No se pudo completar el envío del comprobante.\n\n" +
+                    "Error: " + mensajeError + "\n\n" +
+                    "Revisa los datos e intenta nuevamente. Si el problema persiste, " +
+                    "consulta el archivo 'data/ultimo_error_envio.txt' para más detalles.",
+                    "Error en el Envío",
+                    JOptionPane.ERROR_MESSAGE
+            );
         } finally {
             setEstadoFormulario(true, lblEstado.getText());
         }
@@ -776,22 +790,47 @@ public class FrmNomina extends JFrame {
         JOptionPane.showMessageDialog(this, mensaje, "Error", JOptionPane.ERROR_MESSAGE);
     }
 
-    private String obtenerMensajeError(Throwable error) {
-        Throwable actual = error;
+    private String obtenerMensajeErrorAmigable(Throwable error) {
+        String mensajeOriginal = error.getMessage();
+        if (mensajeOriginal == null) mensajeOriginal = "";
 
-        while (actual != null) {
-            String tipo = actual.getClass().getSimpleName();
-            String mensaje = actual.getMessage();
-
-            if (mensaje != null && !mensaje.trim().isEmpty()) {
-                return tipo + ": " + mensaje;
-            }
-
-            actual = actual.getCause();
+        // Errores específicos de autenticación
+        if (mensajeOriginal.contains("Google rechazo la autenticacion") ||
+            mensajeOriginal.contains("AuthenticationFailedException")) {
+            return "Error de autenticación con Gmail. Verifica que uses una contraseña de aplicación válida y que tu cuenta esté configurada correctamente.";
         }
 
-        return error.getClass().getName()
-                + ". Revisa el archivo data/ultimo_error_envio.txt para ver el detalle tecnico.";
+        // Errores de envío
+        if (mensajeOriginal.contains("No se pudo entregar el correo") ||
+            mensajeOriginal.contains("SendFailedException")) {
+            return "No se pudo enviar el correo. Verifica la dirección de email del destinatario.";
+        }
+
+        // Errores de conexión
+        if (mensajeOriginal.contains("Fallo la conexion segura") ||
+            mensajeOriginal.contains("SSLException") ||
+            mensajeOriginal.contains("UnknownHostException")) {
+            return "Error de conexión con el servidor de Gmail. Verifica tu conexión a internet.";
+        }
+
+        // Errores de librerías faltantes
+        if (mensajeOriginal.contains("Falta una libreria requerida") ||
+            mensajeOriginal.contains("NoClassDefFoundError")) {
+            return "Faltan librerías necesarias. Contacta al administrador del sistema.";
+        }
+
+        // Errores de archivo
+        if (error instanceof java.io.FileNotFoundException) {
+            return "No se encontró el archivo PDF generado. Verifica los permisos de escritura.";
+        }
+
+        // Errores de formato
+        if (error instanceof IllegalArgumentException) {
+            return "Datos inválidos: " + mensajeOriginal;
+        }
+
+        // Error genérico
+        return "Error inesperado: " + obtenerMensajeError(error);
     }
 
     private void registrarErrorTecnico(Throwable error) {
