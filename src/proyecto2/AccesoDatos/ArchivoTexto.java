@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.List;
 import java.util.Objects;
 
 public class ArchivoTexto implements IArchivo {
@@ -39,6 +40,23 @@ public class ArchivoTexto implements IArchivo {
     }
 
     @Override
+    public void sobrescribir(String dato) throws IOException {
+        try {
+            asegurarDirectorioPadre();
+            Files.writeString(
+                    ruta,
+                    String.valueOf(dato),
+                    StandardCharsets.UTF_8,
+                    StandardOpenOption.CREATE,
+                    StandardOpenOption.TRUNCATE_EXISTING,
+                    StandardOpenOption.WRITE
+            );
+        } catch (IOException ex) {
+            throw new IOException("No se pudo sobrescribir la informacion en: " + ruta, ex);
+        }
+    }
+
+    @Override
     public String leer() throws IOException {
         try {
             if (!Files.exists(ruta)) {
@@ -49,6 +67,24 @@ public class ArchivoTexto implements IArchivo {
         } catch (IOException ex) {
             throw new IOException("No se pudo leer la informacion de: " + ruta, ex);
         }
+    }
+
+    @Override
+    public List<String> leerLineas() throws IOException {
+        try {
+            if (!Files.exists(ruta)) {
+                return List.of();
+            }
+
+            return Files.readAllLines(ruta, StandardCharsets.UTF_8);
+        } catch (IOException ex) {
+            throw new IOException("No se pudieron leer las lineas de: " + ruta, ex);
+        }
+    }
+
+    @Override
+    public boolean existe() {
+        return Files.exists(ruta);
     }
 
     public Path getRuta() {
