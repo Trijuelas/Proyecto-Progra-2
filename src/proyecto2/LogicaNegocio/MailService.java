@@ -22,6 +22,10 @@ import proyecto2.Entidades.Nomina;
 
 public class MailService {
 
+    private static final String SMTP_HOST = "smtp.gmail.com";
+    private static final String SMTP_PORT = "587";
+    private static final String SMTP_TLS_PROTOCOL = "TLSv1.2";
+
     public void enviarCorreo(String remitente, String password, Empleado empleado, Nomina nomina, Path rutaPdf) throws Exception {
         if (remitente == null || remitente.trim().isEmpty()) {
             throw new IllegalArgumentException("Debes indicar el correo remitente.");
@@ -40,13 +44,13 @@ public class MailService {
         }
 
         Properties props = new Properties();
-        props.put("mail.smtp.host", "smtp.gmail.com");
-        props.put("mail.smtp.port", "587");
+        props.put("mail.smtp.host", SMTP_HOST);
+        props.put("mail.smtp.port", SMTP_PORT);
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");
         props.put("mail.smtp.starttls.required", "true");
-        props.put("mail.smtp.ssl.protocols", "TLSv1.2");
-        props.put("mail.smtp.ssl.trust", "smtp.gmail.com");
+        props.put("mail.smtp.ssl.protocols", SMTP_TLS_PROTOCOL);
+        props.put("mail.smtp.ssl.trust", SMTP_HOST);
 
         Session session = Session.getInstance(props, new Authenticator() {
             @Override

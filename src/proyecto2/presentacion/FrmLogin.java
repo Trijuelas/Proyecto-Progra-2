@@ -4,11 +4,13 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.util.Arrays;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -22,7 +24,10 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
+import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 public class FrmLogin extends JFrame {
 
@@ -32,16 +37,27 @@ public class FrmLogin extends JFrame {
     private static final Color PANEL = new Color(255, 255, 255);
     private static final Color PRIMARY = new Color(26, 115, 232);
     private static final Color PRIMARY_DARK = new Color(14, 84, 170);
+    private static final Color PRIMARY_SOFT = new Color(227, 238, 255);
     private static final Color TEXT = new Color(33, 37, 41);
     private static final Color MUTED = new Color(108, 117, 125);
+    private static final Color BORDER = new Color(220, 226, 234);
+    private static final Color SUCCESS = new Color(46, 125, 50);
+    private static final Color ERROR = new Color(198, 40, 40);
+    private static final Color WARNING = new Color(239, 108, 0);
 
     private JTextField txtUsuario;
     private JPasswordField txtClave;
     private JLabel lblEstado;
+    private JLabel lblAyudaUsuario;
+    private JLabel lblAyudaClave;
+    private JButton btnIngresar;
+    private JButton btnLimpiar;
+    private JCheckBox chkMostrarClave;
 
     public FrmLogin() {
         initComponents();
         configurarVentana();
+        configurarValidacionesVisuales();
     }
 
     private void configurarVentana() {
@@ -51,6 +67,12 @@ public class FrmLogin extends JFrame {
         setSize(1024, 640);
         setLocationRelativeTo(null);
         setResizable(true);
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowOpened(WindowEvent e) {
+                txtUsuario.requestFocusInWindow();
+            }
+        });
     }
 
     private void initComponents() {
@@ -61,7 +83,7 @@ public class FrmLogin extends JFrame {
         JPanel card = new JPanel(new BorderLayout());
         card.setBackground(PANEL);
         card.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(220, 226, 234)),
+                BorderFactory.createLineBorder(BORDER),
                 new EmptyBorder(0, 0, 0, 0)
         ));
 
@@ -109,6 +131,8 @@ public class FrmLogin extends JFrame {
         panel.add(createFeature("Agilidad", "Preparado para flujo rapido de trabajo."));
         panel.add(Box.createVerticalStrut(14));
         panel.add(createFeature("Presentacion", "Interfaz moderna y mas profesional."));
+        panel.add(Box.createVerticalStrut(26));
+        panel.add(createStatsPanel());
 
         return panel;
     }
@@ -129,6 +153,44 @@ public class FrmLogin extends JFrame {
         wrapper.add(dot, BorderLayout.WEST);
         wrapper.add(text, BorderLayout.CENTER);
         return wrapper;
+    }
+
+    private JPanel createStatsPanel() {
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setOpaque(false);
+        panel.setAlignmentX(LEFT_ALIGNMENT);
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.weightx = 1.0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(0, 0, 12, 0);
+        panel.add(createStatCard("Acceso rapido", "Diseno limpio para iniciar sin distracciones."), gbc);
+
+        gbc.gridy++;
+        gbc.insets = new Insets(0, 0, 0, 0);
+        panel.add(createStatCard("Interfaz clara", "Jerarquia visual que facilita el siguiente paso."), gbc);
+        return panel;
+    }
+
+    private JPanel createStatCard(String title, String detail) {
+        JPanel card = new JPanel(new BorderLayout(0, 8));
+        card.setOpaque(true);
+        card.setBackground(new Color(255, 255, 255, 30));
+        card.setBorder(new EmptyBorder(14, 16, 14, 16));
+
+        JLabel lblTitle = new JLabel(title);
+        lblTitle.setForeground(Color.WHITE);
+        lblTitle.setFont(new Font("SansSerif", Font.BOLD, 14));
+
+        JLabel lblDetail = new JLabel("<html>" + detail + "</html>");
+        lblDetail.setForeground(new Color(224, 231, 255));
+        lblDetail.setFont(new Font("SansSerif", Font.PLAIN, 13));
+
+        card.add(lblTitle, BorderLayout.NORTH);
+        card.add(lblDetail, BorderLayout.CENTER);
+        return card;
     }
 
     private JPanel buildLoginPanel() {
@@ -155,6 +217,10 @@ public class FrmLogin extends JFrame {
         container.add(description, gbc);
 
         gbc.gridy++;
+        gbc.insets = new Insets(22, 0, 18, 0);
+        container.add(buildHighlightPanel(), gbc);
+
+        gbc.gridy++;
         gbc.insets = new Insets(24, 0, 6, 0);
         container.add(createFieldLabel("Usuario"), gbc);
 
@@ -162,6 +228,11 @@ public class FrmLogin extends JFrame {
         gbc.insets = new Insets(6, 0, 10, 0);
         txtUsuario = createTextField();
         container.add(txtUsuario, gbc);
+
+        gbc.gridy++;
+        gbc.insets = new Insets(0, 0, 10, 0);
+        lblAyudaUsuario = createHelperLabel("Escribe tu usuario institucional.");
+        container.add(lblAyudaUsuario, gbc);
 
         gbc.gridy++;
         gbc.insets = new Insets(10, 0, 6, 0);
@@ -173,17 +244,23 @@ public class FrmLogin extends JFrame {
         container.add(txtClave, gbc);
 
         gbc.gridy++;
+        gbc.insets = new Insets(0, 0, 10, 0);
+        lblAyudaClave = createHelperLabel("Ingresa tu contrasena para continuar.");
+        container.add(lblAyudaClave, gbc);
+
+        gbc.gridy++;
         gbc.insets = new Insets(2, 0, 10, 0);
         container.add(buildOptionsRow(), gbc);
 
         gbc.gridy++;
         gbc.insets = new Insets(12, 0, 10, 0);
-        JButton btnIngresar = createPrimaryButton("Iniciar sesion");
+        btnIngresar = createPrimaryButton("Iniciar sesion");
         btnIngresar.addActionListener(evt -> autenticar());
         container.add(btnIngresar, gbc);
+        getRootPane().setDefaultButton(btnIngresar);
 
         gbc.gridy++;
-        JButton btnLimpiar = createSecondaryButton("Limpiar campos");
+        btnLimpiar = createSecondaryButton("Limpiar campos");
         btnLimpiar.addActionListener(evt -> limpiarCampos());
         container.add(btnLimpiar, gbc);
 
@@ -201,6 +278,33 @@ public class FrmLogin extends JFrame {
         return container;
     }
 
+    private JPanel buildHighlightPanel() {
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBackground(PRIMARY_SOFT);
+        panel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(198, 218, 255)),
+                new EmptyBorder(16, 18, 16, 18)
+        ));
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.WEST;
+
+        JLabel title = new JLabel("Antes de ingresar");
+        title.setForeground(TEXT);
+        title.setFont(new Font("SansSerif", Font.BOLD, 14));
+        panel.add(title, gbc);
+
+        gbc.gridy++;
+        gbc.insets = new Insets(6, 0, 0, 0);
+        JLabel detail = new JLabel("<html>Usa tus credenciales del sistema y verifica que el usuario este escrito correctamente.</html>");
+        detail.setForeground(MUTED);
+        detail.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        panel.add(detail, gbc);
+        return panel;
+    }
+
     private JPanel buildOptionsRow() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setOpaque(false);
@@ -210,12 +314,23 @@ public class FrmLogin extends JFrame {
         check.setForeground(MUTED);
         check.setFont(new Font("SansSerif", Font.PLAIN, 13));
 
+        chkMostrarClave = new JCheckBox("Mostrar contrasena");
+        chkMostrarClave.setOpaque(false);
+        chkMostrarClave.setForeground(MUTED);
+        chkMostrarClave.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        chkMostrarClave.addActionListener(evt -> txtClave.setEchoChar(chkMostrarClave.isSelected() ? (char) 0 : '\u2022'));
+
+        JPanel left = new JPanel(new BorderLayout(12, 0));
+        left.setOpaque(false);
+        left.add(check, BorderLayout.WEST);
+        left.add(chkMostrarClave, BorderLayout.CENTER);
+
         JLabel link = new JLabel("Necesitas ayuda?");
         link.setForeground(PRIMARY);
         link.setFont(new Font("SansSerif", Font.BOLD, 13));
         link.setHorizontalAlignment(SwingConstants.RIGHT);
 
-        panel.add(check, BorderLayout.WEST);
+        panel.add(left, BorderLayout.WEST);
         panel.add(link, BorderLayout.EAST);
         return panel;
     }
@@ -227,6 +342,13 @@ public class FrmLogin extends JFrame {
         return label;
     }
 
+    private JLabel createHelperLabel(String text) {
+        JLabel label = new JLabel(text);
+        label.setForeground(MUTED);
+        label.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        return label;
+    }
+
     private JTextField createTextField() {
         JTextField field = new JTextField();
         field.setPreferredSize(new Dimension(0, 40));
@@ -235,6 +357,8 @@ public class FrmLogin extends JFrame {
                 new EmptyBorder(10, 12, 10, 12)
         ));
         field.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        field.setBackground(new Color(252, 253, 255));
+        field.setToolTipText("Escribe tu usuario para iniciar sesion.");
         return field;
     }
 
@@ -246,6 +370,9 @@ public class FrmLogin extends JFrame {
                 new EmptyBorder(10, 12, 10, 12)
         ));
         field.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        field.setBackground(new Color(252, 253, 255));
+        field.setEchoChar('\u2022');
+        field.setToolTipText("Ingresa tu contrasena de acceso.");
         return field;
     }
 
@@ -271,16 +398,108 @@ public class FrmLogin extends JFrame {
         return button;
     }
 
-    private void autenticar() {
-        String usuario = txtUsuario.getText().trim();
-        String clave = new String(txtClave.getPassword()).trim();
+    private void configurarValidacionesVisuales() {
+        instalarValidacionEnVivo(txtUsuario, () -> validarUsuario(false));
+        instalarValidacionEnVivo(txtClave, () -> validarClave(false));
+    }
 
-        if (usuario.isEmpty() || clave.isEmpty()) {
-            actualizarEstado("Completa usuario y contrasena.", true);
-            JOptionPane.showMessageDialog(this, "Debes completar ambos campos.", "Validacion", JOptionPane.WARNING_MESSAGE);
+    private void instalarValidacionEnVivo(JTextField field, Runnable accion) {
+        field.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                accion.run();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                accion.run();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                accion.run();
+            }
+        });
+    }
+
+    private boolean validarUsuario(boolean mostrarVacioComoError) {
+        String usuario = txtUsuario.getText().trim();
+
+        if (usuario.isEmpty()) {
+            if (mostrarVacioComoError) {
+                marcarCampo(txtUsuario, lblAyudaUsuario, "El usuario es obligatorio.", ERROR);
+                return false;
+            }
+            restaurarCampo(txtUsuario, lblAyudaUsuario, "Escribe tu usuario institucional.");
+            return false;
+        }
+
+        if (usuario.length() < 3) {
+            marcarCampo(txtUsuario, lblAyudaUsuario, "Debe tener al menos 3 caracteres.", WARNING);
+            return false;
+        }
+
+        marcarCampo(txtUsuario, lblAyudaUsuario, "Usuario con formato valido.", SUCCESS);
+        return true;
+    }
+
+    private boolean validarClave(boolean mostrarVacioComoError) {
+        char[] clave = txtClave.getPassword();
+        String valor = new String(clave).trim();
+
+        try {
+            if (valor.isEmpty()) {
+                if (mostrarVacioComoError) {
+                    marcarCampo(txtClave, lblAyudaClave, "La contrasena es obligatoria.", ERROR);
+                    return false;
+                }
+                restaurarCampo(txtClave, lblAyudaClave, "Ingresa tu contrasena para continuar.");
+                return false;
+            }
+
+            if (valor.length() < 4) {
+                marcarCampo(txtClave, lblAyudaClave, "Debe tener al menos 4 caracteres.", WARNING);
+                return false;
+            }
+
+            marcarCampo(txtClave, lblAyudaClave, "Contrasena capturada correctamente.", SUCCESS);
+            return true;
+        } finally {
+            Arrays.fill(clave, '\0');
+        }
+    }
+
+    private void marcarCampo(JTextField field, JLabel helpLabel, String message, Color color) {
+        field.setBorder(createFieldBorder(color));
+        helpLabel.setForeground(color);
+        helpLabel.setText(message);
+    }
+
+    private void restaurarCampo(JTextField field, JLabel helpLabel, String message) {
+        field.setBorder(createFieldBorder(new Color(206, 212, 218)));
+        helpLabel.setForeground(MUTED);
+        helpLabel.setText(message);
+    }
+
+    private Border createFieldBorder(Color color) {
+        return BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(color, 2),
+                new EmptyBorder(9, 11, 9, 11)
+        );
+    }
+
+    private void autenticar() {
+        boolean usuarioValido = validarUsuario(true);
+        boolean claveValida = validarClave(true);
+
+        if (!usuarioValido || !claveValida) {
+            actualizarEstado("Corrige los campos marcados antes de continuar.", true);
+            JOptionPane.showMessageDialog(this, "Revisa los campos resaltados para continuar.", "Validacion", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
+        String usuario = txtUsuario.getText().trim();
+        setEstadoFormulario(false, "Validando credenciales...");
         actualizarEstado("Credenciales capturadas correctamente.", false);
         JOptionPane.showMessageDialog(
                 this,
@@ -288,17 +507,32 @@ public class FrmLogin extends JFrame {
                 "Acceso concedido",
                 JOptionPane.INFORMATION_MESSAGE
         );
+        setEstadoFormulario(true, "Listo para iniciar sesion.");
     }
 
     private void limpiarCampos() {
         txtUsuario.setText("");
         txtClave.setText("");
+        chkMostrarClave.setSelected(false);
+        txtClave.setEchoChar('\u2022');
+        restaurarCampo(txtUsuario, lblAyudaUsuario, "Escribe tu usuario institucional.");
+        restaurarCampo(txtClave, lblAyudaClave, "Ingresa tu contrasena para continuar.");
         actualizarEstado("Campos limpiados.", false);
+        txtUsuario.requestFocusInWindow();
+    }
+
+    private void setEstadoFormulario(boolean habilitado, String mensaje) {
+        txtUsuario.setEnabled(habilitado);
+        txtClave.setEnabled(habilitado);
+        chkMostrarClave.setEnabled(habilitado);
+        btnIngresar.setEnabled(habilitado);
+        btnLimpiar.setEnabled(habilitado);
+        actualizarEstado(mensaje, false);
     }
 
     private void actualizarEstado(String mensaje, boolean error) {
         lblEstado.setText(mensaje);
-        lblEstado.setForeground(error ? new Color(198, 40, 40) : MUTED);
+        lblEstado.setForeground(error ? ERROR : MUTED);
     }
 
     public static void main(String args[]) {
