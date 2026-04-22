@@ -374,7 +374,7 @@ public class FrmNomina extends JFrame {
         txtResumen.setFont(new Font("SansSerif", Font.PLAIN, 13));
         txtResumen.setBackground(new Color(252, 253, 255));
         txtResumen.setBorder(new EmptyBorder(14, 14, 14, 14));
-        txtResumen.setText("Aqui veras el resumen de la nomina generada.");
+        txtResumen.setText("");
         JScrollPane scroll = new JScrollPane(txtResumen);
         scroll.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(BORDER),
@@ -754,7 +754,7 @@ public class FrmNomina extends JFrame {
         restaurarCampo(txtCedula, lblAyudaCedula, "Solo digitos y un formato reconocible.");
         restaurarCampo(txtSalario, lblAyudaSalario, "Ingresa un monto numerico mayor que cero.");
         restaurarCampo(txtCorreoDestino, lblAyudaCorreoDestino, "Debe ser un correo valido para recibir el PDF.");
-        txtResumen.setText("Aqui veras el resumen de la nomina generada.\n\nSugerencia: completa primero el remitente y luego valida el salario antes de enviar.");
+        txtResumen.setText("");
         actualizarEstado("Campos limpiados.", false);
         txtRemitente.requestFocusInWindow();
     }
