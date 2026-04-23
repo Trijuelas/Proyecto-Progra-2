@@ -9,9 +9,13 @@ public class CalculoNomina extends logicaBase implements ICalculable {
     public Nomina calcular(Empleado empleado) {
 
         double bruto = empleado.getSalarioBase();
-        double deducciones = calcularCCSS(bruto) + calcularRenta(bruto);
+        double sem = calcularSEM(bruto);
+        double ivm = calcularIVM(bruto);
+        double bancoPopular = calcularBancoPopular(bruto);
+        double renta = calcularRenta(bruto);
+        double deducciones = sem + ivm + bancoPopular + renta;
         double neto = bruto - deducciones;
 
-        return new Nomina(bruto, deducciones, neto);
+        return new Nomina(bruto, sem, ivm, bancoPopular, renta, neto);
     }
 }

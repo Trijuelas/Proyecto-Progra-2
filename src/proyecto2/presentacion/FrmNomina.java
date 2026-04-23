@@ -833,6 +833,20 @@ public class FrmNomina extends JFrame {
         return "Error inesperado: " + obtenerMensajeError(error);
     }
 
+    private String obtenerMensajeError(Throwable error) {
+        Throwable actual = error;
+
+        while (actual != null) {
+            String mensaje = actual.getMessage();
+            if (mensaje != null && !mensaje.trim().isEmpty()) {
+                return mensaje;
+            }
+            actual = actual.getCause();
+        }
+
+        return error == null ? "Error desconocido." : error.getClass().getSimpleName();
+    }
+
     private void registrarErrorTecnico(Throwable error) {
         StringWriter buffer = new StringWriter();
         error.printStackTrace(new PrintWriter(buffer));
