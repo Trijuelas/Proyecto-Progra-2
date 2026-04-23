@@ -191,6 +191,11 @@ public class FrmPatrono extends JFrame {
         container.add(btnLimpiar, gbc);
 
         gbc.gridy++;
+        JButton btnVolver = createSecondaryButton("Volver al menu");
+        btnVolver.addActionListener(evt -> volverAlMenu());
+        container.add(btnVolver, gbc);
+
+        gbc.gridy++;
         gbc.insets = new Insets(18, 0, 8, 0);
         lblEstado = new JLabel("Listo para guardar informacion del patrono.");
         lblEstado.setForeground(MUTED);
@@ -299,5 +304,10 @@ public class FrmPatrono extends JFrame {
         lblEstado.setText("Campos limpiados.");
         lblEstado.setForeground(MUTED);
         txtNombre.requestFocusInWindow();
+    }
+
+    private void volverAlMenu() {
+        new FrmMenuPrincipal().setVisible(true);
+        dispose();
     }
 }
