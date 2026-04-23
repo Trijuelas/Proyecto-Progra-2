@@ -92,8 +92,8 @@ public class FrmNomina extends JFrame {
     private void configurarVentana() {
         setTitle("Sistema de Nomina - Windows");
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setMinimumSize(new Dimension(980, 620));
-        setSize(1160, 720);
+        setMinimumSize(new Dimension(1180, 760));
+        setSize(1280, 820);
         setLocationRelativeTo(null);
         setResizable(true);
         addWindowListener(new WindowAdapter() {
