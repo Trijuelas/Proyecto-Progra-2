@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -92,8 +93,8 @@ public class FrmNomina extends JFrame {
     private void configurarVentana() {
         setTitle("Sistema de Nomina - Windows");
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setMinimumSize(new Dimension(1180, 760));
-        setSize(1280, 820);
+        setMinimumSize(new Dimension(900, 560));
+        setSize(1024, 680);
         setLocationRelativeTo(null);
         setResizable(true);
         addWindowListener(new WindowAdapter() {
@@ -107,7 +108,7 @@ public class FrmNomina extends JFrame {
     private void initComponents() {
         JPanel content = new JPanel(new BorderLayout());
         content.setBackground(BACKGROUND);
-        content.setBorder(new EmptyBorder(24, 24, 24, 24));
+        content.setBorder(new EmptyBorder(16, 16, 16, 16));
 
         JPanel card = new JPanel(new BorderLayout());
         card.setBackground(PANEL);
@@ -117,7 +118,10 @@ public class FrmNomina extends JFrame {
         ));
 
         card.add(buildBrandPanel(), BorderLayout.WEST);
-        card.add(buildFormPanel(), BorderLayout.CENTER);
+        JScrollPane formScroll = new JScrollPane(buildFormPanel());
+        formScroll.setBorder(null);
+        formScroll.getVerticalScrollBar().setUnitIncrement(16);
+        card.add(formScroll, BorderLayout.CENTER);
 
         content.add(card, BorderLayout.CENTER);
         setContentPane(content);
@@ -125,9 +129,9 @@ public class FrmNomina extends JFrame {
 
     private JPanel buildBrandPanel() {
         JPanel panel = new JPanel();
-        panel.setPreferredSize(new Dimension(360, 0));
+        panel.setPreferredSize(new Dimension(300, 0));
         panel.setBackground(PRIMARY_DARK);
-        panel.setBorder(new EmptyBorder(40, 34, 40, 34));
+        panel.setBorder(new EmptyBorder(28, 26, 28, 26));
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
         JLabel badge = new JLabel("PROYECTO 2");
@@ -140,7 +144,7 @@ public class FrmNomina extends JFrame {
 
         JLabel title = new JLabel("<html>Genera PDF y<br>envia comprobantes<br>por correo</html>");
         title.setForeground(Color.WHITE);
-        title.setFont(new Font("SansSerif", Font.BOLD, 30));
+        title.setFont(new Font("SansSerif", Font.BOLD, 26));
         title.setAlignmentX(LEFT_ALIGNMENT);
 
         JLabel subtitle = new JLabel("<html>Genera comprobantes de nomina y envialos por correo desde una sola pantalla.</html>");
@@ -149,9 +153,9 @@ public class FrmNomina extends JFrame {
         subtitle.setAlignmentX(LEFT_ALIGNMENT);
 
         panel.add(badge);
-        panel.add(Box.createVerticalStrut(32));
+        panel.add(Box.createVerticalStrut(24));
         panel.add(title);
-        panel.add(Box.createVerticalStrut(18));
+        panel.add(Box.createVerticalStrut(14));
         panel.add(subtitle);
         panel.add(Box.createVerticalGlue());
         panel.add(createFeature("Nomina", "Calcula deducciones y salario neto del empleado."));
@@ -227,7 +231,7 @@ public class FrmNomina extends JFrame {
     private JPanel buildFormPanel() {
         JPanel container = new JPanel(new GridBagLayout());
         container.setBackground(PANEL);
-        container.setBorder(new EmptyBorder(34, 42, 34, 42));
+        container.setBorder(new EmptyBorder(24, 34, 24, 34));
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
@@ -236,51 +240,42 @@ public class FrmNomina extends JFrame {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(8, 0, 8, 0);
 
-        JLabel welcome = new JLabel("Datos de envio y nomina");
-        welcome.setFont(new Font("SansSerif", Font.BOLD, 28));
-        welcome.setForeground(TEXT);
-        container.add(welcome, gbc);
+        container.add(buildHeaderPanel(), gbc);
 
         gbc.gridy++;
-        JLabel description = new JLabel("Completa el remitente Gmail, los datos del empleado y envia el comprobante.");
-        description.setFont(new Font("SansSerif", Font.PLAIN, 15));
-        description.setForeground(MUTED);
-        container.add(description, gbc);
-
-        gbc.gridy++;
-        gbc.insets = new Insets(22, 0, 18, 0);
+        gbc.insets = new Insets(14, 0, 12, 0);
         container.add(buildSummaryBanner(), gbc);
 
         gbc.gridy++;
-        gbc.insets = new Insets(24, 0, 6, 0);
+        gbc.insets = new Insets(12, 0, 4, 0);
         container.add(createFieldLabel("Correo remitente de Gmail"), gbc);
 
         gbc.gridy++;
-        gbc.insets = new Insets(6, 0, 10, 0);
+        gbc.insets = new Insets(4, 0, 6, 0);
         txtRemitente = createTextField();
         container.add(txtRemitente, gbc);
 
         gbc.gridy++;
-        gbc.insets = new Insets(0, 0, 10, 0);
+        gbc.insets = new Insets(0, 0, 7, 0);
         lblAyudaRemitente = createHelperLabel("Debe ser un Gmail valido para el envio.");
         container.add(lblAyudaRemitente, gbc);
 
         gbc.gridy++;
-        gbc.insets = new Insets(10, 0, 6, 0);
+        gbc.insets = new Insets(7, 0, 4, 0);
         container.add(createFieldLabel("Contrasena de aplicacion"), gbc);
 
         gbc.gridy++;
-        gbc.insets = new Insets(6, 0, 10, 0);
+        gbc.insets = new Insets(4, 0, 6, 0);
         txtClaveCorreo = createPasswordField();
         container.add(txtClaveCorreo, gbc);
 
         gbc.gridy++;
-        gbc.insets = new Insets(0, 0, 10, 0);
+        gbc.insets = new Insets(0, 0, 7, 0);
         lblAyudaClaveCorreo = createHelperLabel("Usa la contrasena de aplicacion de Gmail.");
         container.add(lblAyudaClaveCorreo, gbc);
 
         gbc.gridy++;
-        gbc.insets = new Insets(2, 0, 10, 0);
+        gbc.insets = new Insets(0, 0, 7, 0);
         chkMostrarClaveCorreo = new JCheckBox("Mostrar contrasena de aplicacion");
         chkMostrarClaveCorreo.setOpaque(false);
         chkMostrarClaveCorreo.setForeground(MUTED);
@@ -289,63 +284,63 @@ public class FrmNomina extends JFrame {
         container.add(chkMostrarClaveCorreo, gbc);
 
         gbc.gridy++;
-        gbc.insets = new Insets(10, 0, 6, 0);
+        gbc.insets = new Insets(7, 0, 4, 0);
         container.add(createFieldLabel("Nombre del empleado"), gbc);
 
         gbc.gridy++;
-        gbc.insets = new Insets(6, 0, 10, 0);
+        gbc.insets = new Insets(4, 0, 6, 0);
         txtNombre = createTextField();
         container.add(txtNombre, gbc);
 
         gbc.gridy++;
-        gbc.insets = new Insets(0, 0, 10, 0);
+        gbc.insets = new Insets(0, 0, 7, 0);
         lblAyudaNombre = createHelperLabel("Ingresa el nombre completo del empleado.");
         container.add(lblAyudaNombre, gbc);
 
         gbc.gridy++;
-        gbc.insets = new Insets(10, 0, 6, 0);
+        gbc.insets = new Insets(7, 0, 4, 0);
         container.add(createFieldLabel("Cedula"), gbc);
 
         gbc.gridy++;
-        gbc.insets = new Insets(6, 0, 10, 0);
+        gbc.insets = new Insets(4, 0, 6, 0);
         txtCedula = createTextField();
         container.add(txtCedula, gbc);
 
         gbc.gridy++;
-        gbc.insets = new Insets(0, 0, 10, 0);
+        gbc.insets = new Insets(0, 0, 7, 0);
         lblAyudaCedula = createHelperLabel("Solo digitos y un formato reconocible.");
         container.add(lblAyudaCedula, gbc);
 
         gbc.gridy++;
-        gbc.insets = new Insets(10, 0, 6, 0);
+        gbc.insets = new Insets(7, 0, 4, 0);
         container.add(createFieldLabel("Salario base"), gbc);
 
         gbc.gridy++;
-        gbc.insets = new Insets(6, 0, 10, 0);
+        gbc.insets = new Insets(4, 0, 6, 0);
         txtSalario = createTextField();
         container.add(txtSalario, gbc);
 
         gbc.gridy++;
-        gbc.insets = new Insets(0, 0, 10, 0);
+        gbc.insets = new Insets(0, 0, 7, 0);
         lblAyudaSalario = createHelperLabel("Ingresa un monto numerico mayor que cero.");
         container.add(lblAyudaSalario, gbc);
 
         gbc.gridy++;
-        gbc.insets = new Insets(10, 0, 6, 0);
+        gbc.insets = new Insets(7, 0, 4, 0);
         container.add(createFieldLabel("Correo del empleado"), gbc);
 
         gbc.gridy++;
-        gbc.insets = new Insets(6, 0, 10, 0);
+        gbc.insets = new Insets(4, 0, 6, 0);
         txtCorreoDestino = createTextField();
         container.add(txtCorreoDestino, gbc);
 
         gbc.gridy++;
-        gbc.insets = new Insets(0, 0, 10, 0);
+        gbc.insets = new Insets(0, 0, 7, 0);
         lblAyudaCorreoDestino = createHelperLabel("Debe ser un correo valido para recibir el PDF.");
         container.add(lblAyudaCorreoDestino, gbc);
 
         gbc.gridy++;
-        gbc.insets = new Insets(12, 0, 10, 0);
+        gbc.insets = new Insets(9, 0, 7, 0);
         btnEnviar = createPrimaryButton("Generar PDF y enviar");
         btnEnviar.addActionListener(evt -> procesarNomina());
         container.add(btnEnviar, gbc);
@@ -357,7 +352,7 @@ public class FrmNomina extends JFrame {
         container.add(btnLimpiar, gbc);
 
         gbc.gridy++;
-        gbc.insets = new Insets(18, 0, 8, 0);
+        gbc.insets = new Insets(12, 0, 6, 0);
         lblEstado = new JLabel("Listo para procesar una nomina.");
         lblEstado.setForeground(MUTED);
         lblEstado.setFont(new Font("SansSerif", Font.PLAIN, 13));
@@ -383,6 +378,39 @@ public class FrmNomina extends JFrame {
         container.add(scroll, gbc);
 
         return container;
+    }
+
+    private JPanel buildHeaderPanel() {
+        JPanel header = new JPanel(new BorderLayout(16, 0));
+        header.setOpaque(false);
+
+        JPanel textos = new JPanel();
+        textos.setOpaque(false);
+        textos.setLayout(new BoxLayout(textos, BoxLayout.Y_AXIS));
+
+        JLabel welcome = new JLabel("Datos de envio y nomina");
+        welcome.setFont(new Font("SansSerif", Font.BOLD, 24));
+        welcome.setForeground(TEXT);
+        welcome.setAlignmentX(LEFT_ALIGNMENT);
+
+        JLabel description = new JLabel("Completa el patron, el empleado y envia el comprobante.");
+        description.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        description.setForeground(MUTED);
+        description.setAlignmentX(LEFT_ALIGNMENT);
+
+        textos.add(welcome);
+        textos.add(Box.createVerticalStrut(4));
+        textos.add(description);
+
+        JPanel acciones = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+        acciones.setOpaque(false);
+        JButton btnVolver = createSecondaryButton("Volver al menu");
+        btnVolver.addActionListener(evt -> volverAlMenu());
+        acciones.add(btnVolver);
+
+        header.add(textos, BorderLayout.CENTER);
+        header.add(acciones, BorderLayout.EAST);
+        return header;
     }
 
     private JPanel buildSummaryBanner() {
@@ -428,10 +456,10 @@ public class FrmNomina extends JFrame {
 
     private JTextField createTextField() {
         JTextField field = new JTextField();
-        field.setPreferredSize(new Dimension(0, 40));
+        field.setPreferredSize(new Dimension(0, 34));
         field.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(206, 212, 218)),
-                new EmptyBorder(10, 12, 10, 12)
+                new EmptyBorder(7, 12, 7, 12)
         ));
         field.setFont(new Font("SansSerif", Font.PLAIN, 14));
         field.setBackground(new Color(252, 253, 255));
@@ -441,10 +469,10 @@ public class FrmNomina extends JFrame {
 
     private JPasswordField createPasswordField() {
         JPasswordField field = new JPasswordField();
-        field.setPreferredSize(new Dimension(0, 40));
+        field.setPreferredSize(new Dimension(0, 34));
         field.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(206, 212, 218)),
-                new EmptyBorder(10, 12, 10, 12)
+                new EmptyBorder(7, 12, 7, 12)
         ));
         field.setFont(new Font("SansSerif", Font.PLAIN, 14));
         field.setBackground(new Color(252, 253, 255));
@@ -459,7 +487,7 @@ public class FrmNomina extends JFrame {
         button.setForeground(Color.WHITE);
         button.setFocusPainted(false);
         button.setFont(new Font("SansSerif", Font.BOLD, 14));
-        button.setBorder(new EmptyBorder(12, 16, 12, 16));
+        button.setBorder(new EmptyBorder(9, 16, 9, 16));
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
         return button;
     }
@@ -470,9 +498,14 @@ public class FrmNomina extends JFrame {
         button.setForeground(TEXT);
         button.setFocusPainted(false);
         button.setFont(new Font("SansSerif", Font.BOLD, 14));
-        button.setBorder(new EmptyBorder(12, 16, 12, 16));
+        button.setBorder(new EmptyBorder(9, 16, 9, 16));
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
         return button;
+    }
+
+    private void volverAlMenu() {
+        new FrmMenuPrincipal().setVisible(true);
+        dispose();
     }
 
     private void configurarValidacionesVisuales() {

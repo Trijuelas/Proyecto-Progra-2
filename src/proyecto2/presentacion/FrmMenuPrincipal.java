@@ -35,9 +35,11 @@ public class FrmMenuPrincipal extends JFrame {
     private void configurarVentana() {
         setTitle("Sistema de Nomina - Menu Principal");
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setMinimumSize(new Dimension(980, 620));
-        setSize(1080, 680);
+        setMinimumSize(new Dimension(1180, 760));
+        setSize(1320, 860);
         setLocationRelativeTo(null);
+        setResizable(true);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
     }
 
     private void initComponents() {
@@ -133,7 +135,10 @@ public class FrmMenuPrincipal extends JFrame {
                 "Empleado y Correo",
                 "Abre la interfaz actual para capturar datos del empleado, generar el PDF y enviarlo por correo.",
                 "Abrir empleado",
-                () -> new FrmNomina().setVisible(true)
+                () -> {
+                    new FrmNomina().setVisible(true);
+                    dispose();
+                }
         ), gbc);
 
         gbc.gridx = 1;
@@ -141,7 +146,10 @@ public class FrmMenuPrincipal extends JFrame {
                 "Patrono",
                 "Abre una ventana simple para registrar nombre, cedula juridica, telefono y correo del patrono.",
                 "Abrir patrono",
-                () -> new FrmPatrono().setVisible(true)
+                () -> {
+                    new FrmPatrono().setVisible(true);
+                    dispose();
+                }
         ), gbc);
 
         gbc.gridx = 0;
