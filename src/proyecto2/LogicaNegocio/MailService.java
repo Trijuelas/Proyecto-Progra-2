@@ -43,6 +43,36 @@ public class MailService {
             throw new FileNotFoundException("No se encontro el PDF adjunto que se iba a enviar.");
         }
 
+        enviarCorreoConAdjunto(
+                remitente,
+                password,
+                empleado.getCorreo(),
+                "Comprobante de nomina para " + empleado.getNombre(),
+                "Hola " + empleado.getNombre() + ",\n\n"
+                + "Adjunto encontraras tu comprobante de nomina.\n"
+                + String.format("Salario neto: %.2f\n\n", nomina.getSalarioNeto())
+                + "Saludos.",
+                rutaPdf
+        );
+    }
+
+    public void enviarCorreoConAdjunto(String remitente, String password, String destinatario, String asunto, String cuerpo, Path rutaPdf) throws Exception {
+        if (remitente == null || remitente.trim().isEmpty()) {
+            throw new IllegalArgumentException("Debes indicar el correo remitente.");
+        }
+
+        if (password == null || password.trim().isEmpty()) {
+            throw new IllegalArgumentException("Debes indicar la contrasena de aplicacion.");
+        }
+
+        if (destinatario == null || destinatario.trim().isEmpty()) {
+            throw new IllegalArgumentException("Debes indicar el correo destino.");
+        }
+
+        if (rutaPdf == null || !rutaPdf.toFile().exists()) {
+            throw new FileNotFoundException("No se encontro el PDF adjunto que se iba a enviar.");
+        }
+
         Properties props = new Properties();
         props.put("mail.smtp.host", SMTP_HOST);
         props.put("mail.smtp.port", SMTP_PORT);
@@ -62,19 +92,14 @@ public class MailService {
         Message message = new MimeMessage(session);
         message.setFrom(new InternetAddress(remitente));
         try {
-            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(empleado.getCorreo(), true));
+            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(destinatario, true));
         } catch (AddressException ex) {
             throw new IllegalArgumentException("El correo destino no tiene un formato valido.", ex);
         }
-        message.setSubject("Comprobante de nomina para " + empleado.getNombre());
+        message.setSubject(asunto == null || asunto.trim().isEmpty() ? "Documento adjunto" : asunto.trim());
 
         MimeBodyPart texto = new MimeBodyPart();
-        texto.setText(
-                "Hola " + empleado.getNombre() + ",\n\n"
-                + "Adjunto encontraras tu comprobante de nomina.\n"
-                + String.format("Salario neto: %.2f\n\n", nomina.getSalarioNeto())
-                + "Saludos."
-        );
+        texto.setText(cuerpo == null || cuerpo.trim().isEmpty() ? "Adjunto encontraras el documento generado." : cuerpo);
 
         MimeBodyPart adjunto = new MimeBodyPart();
         DataSource source = new FileDataSource(rutaPdf.toFile());
