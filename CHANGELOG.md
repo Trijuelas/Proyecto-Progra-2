@@ -4,7 +4,7 @@ Historial de cambios del sistema de nomina desarrollado en Java.
 
 > Nota: el repositorio no tenia etiquetas (`tags`) de version al momento de crear este archivo. Las versiones se reconstruyeron a partir del historial de commits y de las mejoras visibles en el proyecto.
 
-## Version 1.7.0 - 2026-04-22
+## Version 1.7.0
 
 ### Resumen
 
@@ -40,7 +40,7 @@ Nueva version enfocada en mejorar la presentacion profesional del comprobante PD
 - `src/proyecto2/Entidades/Nomina.java`
 - `src/proyecto2/presentacion/FrmNomina.java`
 
-## Version 1.6.0 - 2026-04-22
+## Version 1.6.0
 
 ### Resumen
 
@@ -52,7 +52,7 @@ Version enfocada en ajustes visuales y refinamiento de la interfaz.
 - Se mantuvo el flujo de generacion de nomina, PDF y envio por correo.
 - Se reforzo la experiencia del usuario al interactuar con el modulo de nomina.
 
-## Version 1.5.0 - 2026-04-22
+## Version 1.5.0
 
 ### Resumen
 
@@ -65,7 +65,7 @@ Version enfocada en manejo de errores y soporte para diagnostico.
 - Se agrego soporte para registrar detalles tecnicos de errores en archivos locales.
 - Se fortalecio el flujo cuando falla la autenticacion, conexion o entrega del correo.
 
-## Version 1.4.0 - 2026-04-22
+## Version 1.4.0
 
 ### Resumen
 
@@ -77,7 +77,7 @@ Version enfocada en mejorar la generacion del comprobante PDF.
 - Se mantuvo el almacenamiento de documentos en la carpeta `documentos_pdf`.
 - Se preparo la base para que el comprobante pudiera adjuntarse al correo del empleado.
 
-## Version 1.3.0 - 2026-04-22
+## Version 1.3.0
 
 ### Resumen
 
@@ -90,7 +90,7 @@ Version de documentacion y entrega academica.
 - Se explicaron los requisitos, flujo de uso y archivos generados.
 - Se fortalecio la documentacion para facilitar instalacion, revision y mantenimiento.
 
-## Version 1.2.0 - 2026-04-21
+## Version 1.2.0
 
 ### Resumen
 
@@ -103,7 +103,7 @@ Version enfocada en robustecer el acceso a archivos y la resolucion de rutas.
 - Se preciso el contrato de la interfaz `IArchivo`.
 - Se centralizo la resolucion de rutas para evitar problemas al ejecutar desde NetBeans o desde consola.
 
-## Version 1.1.0 - 2026-04-20 / 2026-04-21
+## Version 1.1.0
 
 ### Resumen
 
@@ -118,7 +118,7 @@ Version enfocada en modernizar la experiencia de usuario y ordenar la logica int
 - Se centralizaron constantes relacionadas con SMTP.
 - Se limpiaron encabezados generados por plantillas del IDE.
 
-## Version 1.0.0 - 2026-04-20
+## Version 1.0.0
 
 ### Resumen
 
